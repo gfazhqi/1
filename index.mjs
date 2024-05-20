@@ -9,10 +9,10 @@ const fetchWithTimeout = (url, options, timeout = 5000) => {
   ]);
 };
 
-const tembak = async (token, retries = 3) => {
-  const randomtap = Math.floor(Math.random() * 50) + 50;
-  try {
-    const response = await fetchWithTimeout('https://api.tapswap.ai/api/player/submit_taps', {
+const tembak = (token) => {
+  return new Promise((resolve, reject) => {
+    const randomtap = Math.floor(Math.random() * 50) + 50;
+    fetchWithTimeout('https://api.tapswap.ai/api/player/submit_taps', {
       method: 'POST',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Galaxy S7 Build/RQ1A.210105.003; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.120 Mobile Safari/537.36',
@@ -34,20 +34,16 @@ const tembak = async (token, retries = 3) => {
         taps: randomtap,
         time: new Date().getTime() - 10000,
       }),
-    });
-    return await response.json();
-  } catch (error) {
-    if (retries > 0) {
-      console.log(`[ ${new Date().toLocaleString()} ] Error during submit_taps, retrying...: ${error}`);
-      return tembak(token, retries - 1);
-    }
-    throw error;
-  }
+    })
+      .then(response => response.json())
+      .then(data => resolve(data))
+      .catch(error => reject(error));
+  });
 };
 
-const login = async (hash, retries = 3) => {
-  try {
-    const response = await fetchWithTimeout('https://api.tapswap.ai/api/account/login', {
+const login = (hash) => {
+  return new Promise((resolve, reject) => {
+    fetchWithTimeout('https://api.tapswap.ai/api/account/login', {
       method: 'POST',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Galaxy S7 Build/RQ1A.210105.003; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.120 Mobile Safari/537.36',
@@ -68,20 +64,16 @@ const login = async (hash, retries = 3) => {
         referrer: '',
         bot_key: 'app_bot_0',
       }),
-    });
-    return await response.json();
-  } catch (error) {
-    if (retries > 0) {
-      console.log(`[ ${new Date().toLocaleString()} ] Error during login, retrying...: ${error}`);
-      return login(hash, retries - 1);
-    }
-    throw error;
-  }
+    })
+      .then(response => response.json())
+      .then(data => resolve(data))
+      .catch(error => reject(error));
+  });
 };
 
-const applyboost = async (token, retries = 3) => {
-  try {
-    const response = await fetchWithTimeout('https://api.tapswap.ai/api/player/apply_boost', {
+const applyboost = (token) => {
+  return new Promise((resolve, reject) => {
+    fetchWithTimeout('https://api.tapswap.ai/api/player/apply_boost', {
       method: 'POST',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 11; Galaxy S7 Build/RQ1A.210105.003; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.120 Mobile Safari/537.36',
@@ -101,15 +93,11 @@ const applyboost = async (token, retries = 3) => {
       body: JSON.stringify({
         type: 'energy',
       }),
-    });
-    return await response.json();
-  } catch (error) {
-    if (retries > 0) {
-      console.log(`[ ${new Date().toLocaleString()} ] Error during apply_boost, retrying...: ${error}`);
-      return applyboost(token, retries - 1);
-    }
-    throw error;
-  }
+    })
+      .then(response => response.json())
+      .then(data => resolve(data))
+      .catch(error => reject(error));
+  });
 };
 
 const main = async () => {
@@ -121,15 +109,10 @@ const main = async () => {
     for (let i = 0; i < hashlist.length; i++) {
       console.log(`\n[ ${new Date().toLocaleString()} ] Sedang login akun ke ${i + 1} dari ${hashlist.length}`);
       const hash = hashlist[i].trim();
-      let result;
-      
-      try {
-        result = await login(hash);
-      } catch (err) {
+      const result = await login(hash).catch(err => {
         console.log(`[ ${new Date().toLocaleString()} ] Error during login: ${err}`);
-        continue;
-      }
-
+        return null;
+      });
       let token = result?.access_token;
       
       if (token) {
@@ -168,10 +151,6 @@ const main = async () => {
             if (resulttembak.player.energy <= 100) {
               console.log(`[ ${new Date().toLocaleString()} ] Energi tinggal ${resulttembak.player.energy}`);
               keepGoing = false;
-            } else {
-              const delay = 100 + Math.random() * 100;
-              console.log(`[ ${new Date().toLocaleString()} ] Delay ${delay} ms`);
-              await new Promise(r => setTimeout(r, delay));
             }
           } catch (err) {
             console.log(`[ ${new Date().toLocaleString()} ] Unexpected error: ${err}`);
@@ -182,7 +161,8 @@ const main = async () => {
         console.log(`[ ${new Date().toLocaleString()} ] Login failed: ${result}`);
       }
     }
-    console.log(`\n[ ${new Date().toLocaleString()} ] Selesai semua akun`);
+    console.log(`\n[ ${new Date().toLocaleString()} ] Selesai semua akun, delay 10 menit`);
+    await new Promise(r => setTimeout(r, 60000 * 10));
   }
 };
 
