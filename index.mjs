@@ -1,5 +1,5 @@
-const fs = require('fs');
-const fetch = require('node-fetch');
+import fs from 'fs';
+import fetch from 'node-fetch';
 
 // Function to make fetch requests with a timeout
 const fetchWithTimeout = (url, options, timeout = 5000) => {
