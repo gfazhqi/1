@@ -133,6 +133,7 @@ const main = async () => {
             });
 
             if (!resulttembak?.player?.energy) {
+              console.log(`[ ${new Date().toLocaleString()} ] Energy tidak ditemukan, mencoba login ulang`);
               const reloginres = await login(hash).catch(err => {
                 console.log(`[ ${new Date().toLocaleString()} ] Error during relogin: ${err}`);
                 return null;
