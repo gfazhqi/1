@@ -178,8 +178,10 @@ const main = async () => {
       } else {
         console.log(`[ ${new Date().toLocaleString()} ] Login failed: ${result}`);
       }
-      // Small delay between each account
-      await new Promise(r => setTimeout(r, 1000));
+      
+      // Delay 5 minutes between each account
+      console.log(`[ ${new Date().toLocaleString()} ] Menunggu 5 menit sebelum akun berikutnya`);
+      await new Promise(r => setTimeout(r, 300000)); // Delay 5 minutes
     }
 
     console.log(`\n[ ${new Date().toLocaleString()} ] Batch selesai, delay 2 menit sebelum batch berikutnya`);
