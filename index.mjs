@@ -2,7 +2,7 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 
 // Function to make fetch requests with a timeout
-const fetchWithTimeout = (url, options, timeout = 5000) => {
+const fetchWithTimeout = (url, options, timeout = 10000) => {
   return Promise.race([
     fetch(url, options),
     new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), timeout))
@@ -104,7 +104,9 @@ const main = async () => {
   console.clear();
   const hashlist = fs.readFileSync('hash.txt', 'utf8').trim().split('\n');
   console.log(`[ ${new Date().toLocaleString()} ] Total akun yang akan dijalankan: ${hashlist.length}`);
-  
+
+  const resultTable = [];
+
   while (true) {
     for (let i = 0; i < hashlist.length; i++) {
       console.log(`\n[ ${new Date().toLocaleString()} ] Sedang login akun ke ${i + 1} dari ${hashlist.length}`);
@@ -157,11 +159,21 @@ const main = async () => {
             keepGoing = false;
           }
         }
+        
+        resultTable.push({
+          'Full Name': result.player.full_name,
+          'Energy': resulttembak.player.energy,
+          'Balance': resulttembak.player.shares
+        });
       } else {
         console.log(`[ ${new Date().toLocaleString()} ] Login failed: ${result}`);
       }
+      // Small delay between each account
+      await new Promise(r => setTimeout(r, 1000));
     }
+
     console.log(`\n[ ${new Date().toLocaleString()} ] Selesai semua akun, delay 10 menit`);
+    console.table(resultTable);
     await new Promise(r => setTimeout(r, 60000 * 10));
   }
 };
