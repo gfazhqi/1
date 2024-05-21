@@ -182,7 +182,7 @@ const main = async () => {
 
         // Delay 5 minutes between each account
         console.log(`[ ${new Date().toLocaleString()} ] Menunggu 5 menit sebelum akun berikutnya`);
-        await new Promise(r => setTimeout(r, 300000)); // Delay 5 minutes
+        await new Promise(r => setTimeout(r, 150000)); // Delay 5 minutes
       }
 
       console.log(`\n[ ${new Date().toLocaleString()} ] Batch selesai, delay 2 menit sebelum batch berikutnya`);
