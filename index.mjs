@@ -106,29 +106,32 @@ const main = async () => {
   console.log(`[ ${new Date().toLocaleString()} ] Total akun yang akan dijalankan: ${hashlist.length}`);
 
   const resultTable = [];
+  const batchSize = 10; // Process 10 accounts at a time
 
-  while (true) {
-    for (let i = 0; i < hashlist.length; i++) {
-      console.log(`\n[ ${new Date().toLocaleString()} ] Sedang login akun ke ${i + 1} dari ${hashlist.length}`);
-      const hash = hashlist[i].trim();
+  for (let batchStart = 0; batchStart < hashlist.length; batchStart += batchSize) {
+    const batch = hashlist.slice(batchStart, batchStart + batchSize);
+
+    for (let i = 0; i < batch.length; i++) {
+      console.log(`\n[ ${new Date().toLocaleString()} ] Sedang login akun ke ${batchStart + i + 1} dari ${hashlist.length}`);
+      const hash = batch[i].trim();
       const result = await login(hash).catch(err => {
         console.log(`[ ${new Date().toLocaleString()} ] Error during login: ${err}`);
         return null;
       });
       let token = result?.access_token;
       let resulttembak = null;
-      
+
       if (token) {
         console.log(`[ ${new Date().toLocaleString()} ] Berhasil login, akun ${result.player.full_name}`);
         let keepGoing = true;
-        
+
         while (keepGoing) {
           try {
             resulttembak = await tembak(token).catch(err => {
               console.log(`[ ${new Date().toLocaleString()} ] Error during submit_taps: ${err}`);
               return null;
             });
-            
+
             if (!resulttembak?.player?.energy) {
               const reloginres = await login(hash).catch(err => {
                 console.log(`[ ${new Date().toLocaleString()} ] Error during relogin: ${err}`);
@@ -137,20 +140,20 @@ const main = async () => {
               token = reloginres?.access_token;
               continue;
             }
-            
+
             console.log(`[ ${new Date().toLocaleString()} ] Energi tinggal ${resulttembak.player.energy}`);
             console.log(`[ ${new Date().toLocaleString()} ] Balance ${resulttembak.player.shares}`);
-            
+
             const boostres = await applyboost(token).catch(err => {
               console.log(`[ ${new Date().toLocaleString()} ] Error during apply_boost: ${err}`);
               return null;
             });
-            
+
             if (boostres?.statusCode === 200) {
               console.log(`[ ${new Date().toLocaleString()} ] Berhasil apply boost`);
               continue;
             }
-            
+
             if (resulttembak.player.energy <= 100) {
               console.log(`[ ${new Date().toLocaleString()} ] Energi tinggal ${resulttembak.player.energy}`);
               keepGoing = false;
@@ -160,7 +163,7 @@ const main = async () => {
             keepGoing = false;
           }
         }
-        
+
         resultTable.push({
           'Full Name': result.player.full_name,
           'Energy': resulttembak?.player?.energy,
@@ -173,10 +176,12 @@ const main = async () => {
       await new Promise(r => setTimeout(r, 1000));
     }
 
-    console.log(`\n[ ${new Date().toLocaleString()} ] Selesai semua akun, delay 10 menit`);
+    console.log(`\n[ ${new Date().toLocaleString()} ] Batch selesai, delay 2 menit sebelum batch berikutnya`);
     console.table(resultTable);
-    await new Promise(r => setTimeout(r, 60000 * 10));
+    await new Promise(r => setTimeout(r, 60000 * 2)); // Delay 2 minutes between batches
   }
+
+  console.log(`\n[ ${new Date().toLocaleString()} ] Semua akun selesai diproses`);
 };
 
 main();
