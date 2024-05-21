@@ -139,6 +139,11 @@ const main = async () => {
                 return null;
               });
               token = reloginres?.access_token;
+              if (!token) {
+                console.log(`[ ${new Date().toLocaleString()} ] Gagal login ulang, menunggu 15 menit sebelum mencoba lagi`);
+                await new Promise(r => setTimeout(r, 900000)); // Delay 15 minutes
+                continue;
+              }
               continue;
             }
 
