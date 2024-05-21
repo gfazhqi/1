@@ -116,6 +116,7 @@ const main = async () => {
         return null;
       });
       let token = result?.access_token;
+      let resulttembak = null;
       
       if (token) {
         console.log(`[ ${new Date().toLocaleString()} ] Berhasil login, akun ${result.player.full_name}`);
@@ -123,7 +124,7 @@ const main = async () => {
         
         while (keepGoing) {
           try {
-            const resulttembak = await tembak(token).catch(err => {
+            resulttembak = await tembak(token).catch(err => {
               console.log(`[ ${new Date().toLocaleString()} ] Error during submit_taps: ${err}`);
               return null;
             });
@@ -162,8 +163,8 @@ const main = async () => {
         
         resultTable.push({
           'Full Name': result.player.full_name,
-          'Energy': resulttembak.player.energy,
-          'Balance': resulttembak.player.shares
+          'Energy': resulttembak?.player?.energy,
+          'Balance': resulttembak?.player?.shares
         });
       } else {
         console.log(`[ ${new Date().toLocaleString()} ] Login failed: ${result}`);
